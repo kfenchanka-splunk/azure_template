@@ -242,9 +242,60 @@
               },
               "kind": "StorageV2",
               "properties": {
+                "supportsHttpsTrafficOnly": true,
                 "accessTier": "Cool",
                 "allowBlobPublicAccess": false,
                 "minimumTlsVersion": "TLS1_2"
+              }
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/managementPolicies",
+              "apiVersion": "2019-06-01",
+              "name": "[concat(variables('logsStorageAccountName'), '/default')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('logsStorageAccountName'))]"
+              ],
+              "properties": {
+                "policy": {
+                  "rules": [
+                    {
+                      "name": "DeleteLogsAfterSixtyDays",
+                      "enabled": true,
+                      "type": "Lifecycle",
+                      "definition": {
+                        "actions": {
+                          "baseBlob": {
+                            "delete": {
+                              "daysAfterModificationGreaterThan": 60
+                            }
+                          }
+                        },
+                        "filters": {
+                          "blobTypes": [ "appendBlob" ],
+                          "prefixMatch": [ "insights-logs-" ]
+                        }
+                      }
+                    },
+                    {
+                      "name": "DeleteMetricsAfterSixtyDays",
+                      "enabled": true,
+                      "type": "Lifecycle",
+                      "definition": {
+                        "actions": {
+                          "baseBlob": {
+                            "delete": {
+                              "daysAfterModificationGreaterThan": 60
+                            }
+                          }
+                        },
+                        "filters": {
+                          "blobTypes": [ "appendBlob" ],
+                          "prefixMatch": [ "insights-metrics-" ]
+                        }
+                      }
+                    }
+                  ]
+                }
               }
             },
             {
@@ -258,8 +309,59 @@
               },
               "kind": "StorageV2",
               "properties": {
+                "supportsHttpsTrafficOnly": true,
                 "allowBlobPublicAccess": false,
                 "minimumTlsVersion": "TLS1_2"
+              }
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/managementPolicies",
+              "apiVersion": "2019-06-01",
+              "name": "[concat(variables('backupStorageAccountName'), '/default')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('backupStorageAccountName'))]"
+              ],
+              "properties": {
+                "policy": {
+                  "rules": [
+                    {
+                      "name": "DeleteLogsAfterSixtyDays",
+                      "enabled": true,
+                      "type": "Lifecycle",
+                      "definition": {
+                        "actions": {
+                          "baseBlob": {
+                            "delete": {
+                              "daysAfterModificationGreaterThan": 60
+                            }
+                          }
+                        },
+                        "filters": {
+                          "blobTypes": [ "appendBlob" ],
+                          "prefixMatch": [ "insights-logs-" ]
+                        }
+                      }
+                    },
+                    {
+                      "name": "DeleteMetricsAfterSixtyDays",
+                      "enabled": true,
+                      "type": "Lifecycle",
+                      "definition": {
+                        "actions": {
+                          "baseBlob": {
+                            "delete": {
+                              "daysAfterModificationGreaterThan": 60
+                            }
+                          }
+                        },
+                        "filters": {
+                          "blobTypes": [ "appendBlob" ],
+                          "prefixMatch": [ "insights-metrics-" ]
+                        }
+                      }
+                    }
+                  ]
+                }
               }
             },
             {
@@ -276,10 +378,7 @@
                 "metrics": [
                   {
                     "category": "AllMetrics",
-                    "enabled": true,
-                    "retentionPolicy": {
-                      "enabled": true
-                    }
+                    "enabled": true
                   }
                 ]
               }
@@ -294,10 +393,61 @@
                   "name": "Standard_LRS",
                   "tier": "Standard"
               },
-              "kind": "Storage",
+              "kind": "StorageV2",
               "properties": {
+                "supportsHttpsTrafficOnly": true,
                 "allowBlobPublicAccess": false,
                 "minimumTlsVersion": "TLS1_2"
+              }
+            },
+            {
+              "type": "Microsoft.Storage/storageAccounts/managementPolicies",
+              "apiVersion": "2019-06-01",
+              "name": "[concat(variables('jobsStorageAccountName'), '/default')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('jobsStorageAccountName'))]"
+              ],
+              "properties": {
+                "policy": {
+                  "rules": [
+                    {
+                      "name": "DeleteLogsAfterSixtyDays",
+                      "enabled": true,
+                      "type": "Lifecycle",
+                      "definition": {
+                        "actions": {
+                          "baseBlob": {
+                            "delete": {
+                              "daysAfterModificationGreaterThan": 60
+                            }
+                          }
+                        },
+                        "filters": {
+                          "blobTypes": [ "blockBlob" ],
+                          "prefixMatch": [ "insights-logs-" ]
+                        }
+                      }
+                    },
+                    {
+                      "name": "DeleteMetricsAfterSixtyDays",
+                      "enabled": true,
+                      "type": "Lifecycle",
+                      "definition": {
+                        "actions": {
+                          "baseBlob": {
+                            "delete": {
+                              "daysAfterModificationGreaterThan": 60
+                            }
+                          }
+                        },
+                        "filters": {
+                          "blobTypes": [ "appendBlob" ],
+                          "prefixMatch": [ "insights-metrics-" ]
+                        }
+                      }
+                    }
+                  ]
+                }
               }
             },
             {
@@ -314,10 +464,7 @@
                 "metrics": [
                   {
                     "category": "AllMetrics",
-                    "enabled": true,
-                    "retentionPolicy": {
-                      "enabled": true
-                    }
+                    "enabled": true
                   }
                 ]
               }
@@ -325,12 +472,13 @@
             {
               "type": "Microsoft.EventHub/namespaces",
               "tags": "[union(parameters('allResourceTags'), createObject('SplunkDMDeletionOrder', 5))]",
-              "apiVersion": "2021-11-01",
+              "apiVersion": "2022-01-01-preview",
               "name": "[variables('eventHubNamespaceName')]",
               "location": "[parameters('region')]",
               "properties": {
                 "isAutoInflateEnabled": true,
-                "maximumThroughputUnits": "[variables('eventHubMaxThroughputUnits')]"
+                "maximumThroughputUnits": "[variables('eventHubMaxThroughputUnits')]",
+                "minimumTlsVersion": "1.2"
               },
               "sku": {
                 "name": "Standard",
@@ -365,7 +513,8 @@
                   "name": "[variables('eventHubAuthRuleListen')]",
                   "dependsOn": [
                     "[resourceId('Microsoft.EventHub/namespaces', variables('eventHubNamespaceName'))]",
-                    "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('eventHubNamespaceName'), variables('eventHubName'))]"
+                    "[resourceId('Microsoft.EventHub/namespaces/eventhubs', variables('eventHubNamespaceName'), variables('eventHubName'))]",
+                    "[resourceId('Microsoft.EventHub/namespaces/authorizationRules', variables('eventHubNamespaceName'), variables('eventHubAuthRuleSend'))]"
                   ],
                   "properties": {
                     "rights": [
@@ -403,10 +552,7 @@
                 "metrics": [
                   {
                     "category": "AllMetrics",
-                    "enabled": true,
-                    "retentionPolicy": {
-                      "enabled": true
-                    }
+                    "enabled": true
                   }
                 ]
               }
@@ -414,7 +560,7 @@
             {
               "type": "Microsoft.Web/serverfarms",
               "tags": "[union(parameters('allResourceTags'), createObject('SplunkDMDeletionOrder', 2))]",
-              "apiVersion": "2020-12-01",
+              "apiVersion": "2022-03-01",
               "name": "[variables('hostingPlanName')]",
               "location": "[parameters('region')]",
               "kind": "functionapp",
@@ -441,10 +587,7 @@
                 "metrics": [
                   {
                     "category": "AllMetrics",
-                    "enabled": true,
-                    "retentionPolicy": {
-                      "enabled": true
-                    }
+                    "enabled": true
                   }
                 ]
               }
@@ -453,7 +596,7 @@
               "name": "[variables('functionName')]",
               "type": "Microsoft.Web/sites",
               "tags": "[union(parameters('allResourceTags'), createObject('SplunkDMDeletionOrder', 1))]",
-              "apiVersion": "2020-12-01",
+              "apiVersion": "2022-03-01",
               "location": "[parameters('region')]",
               "kind": "functionapp,linux",
               "dependsOn": [
@@ -471,7 +614,7 @@
                       "*"
                     ]
                   },
-                  "linuxFxVersion": "node|16",
+                  "linuxFxVersion": "node|18",
                   "appSettings": [
                     {
                       "name": "FUNCTIONS_EXTENSION_VERSION",
@@ -560,19 +703,13 @@
                 "logs": [
                   {
                     "category": "FunctionAppLogs",
-                    "enabled": true,
-                    "retentionPolicy": {
-                      "enabled": true
-                    }
+                    "enabled": true
                   }
                 ],
                 "metrics": [
                   {
                     "category": "AllMetrics",
-                    "enabled": true,
-                    "retentionPolicy": {
-                      "enabled": true
-                    }
+                    "enabled": true
                   }
                 ]
               }
